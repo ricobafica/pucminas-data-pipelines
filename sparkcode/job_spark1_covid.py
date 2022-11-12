@@ -20,8 +20,8 @@ spark = (
     .getOrCreate()
 )
 
-url_dataset = 'C:/Users/srjne/OneDrive/Documentos/Estudos/git/Airflow-Covid-19/analises_iniciais/owid-covid-data.csv'
-local_file = '/tmp/covid_dataset.csv'
+url_dataset = 's3://datalake-ricardo-pucminas-808833868807/owid-covid-data.csv'
+local_output = 's3://datalake-ricardo-pucminas-808833868807/output/'
 
 spark.sparkContext.setLogLevel("WARN")
 
@@ -91,10 +91,10 @@ people_vaccinated_per_million = spark.sql("""
     group by continent, location
 """)
 
-write_parquet(view = deaths_per_country, local="output/deaths")
-write_parquet(view = death_per_million_per_country, local="output/death_pm")
-write_parquet(view = excess_mortality_per_million_per_country, local="output/excess_mortality_pm")
-write_parquet(view = population_density_per_country, local="output/population_density")
-write_parquet(view = total_vaccinations_per_million, local="output/vaccinations_pm")
-write_parquet(view = people_vaccinated_per_million, local="output/people_vaccinated_pm")
+write_parquet(view = deaths_per_country, local=local_output+"deaths")
+write_parquet(view = death_per_million_per_country, local=local_output+"death_pm")
+write_parquet(view = excess_mortality_per_million_per_country, local=local_output+"excess_mortality_pm")
+write_parquet(view = population_density_per_country, local=local_output+"population_density")
+write_parquet(view = total_vaccinations_per_million, local=local_output+"vaccinations_pm")
+write_parquet(view = people_vaccinated_per_million, local=local_output+"people_vaccinated_pm")
 

@@ -33,12 +33,12 @@ spark = (
 spark.sparkContext.setLogLevel("WARN")
 
 # Criando variáveis de local das tabelas de indicadores
-deaths_per_country = "output/deaths"
-death_per_million_per_country = "output/death_pm"
-excess_mortality_per_million_per_country = "output/excess_mortality_pm"
-population_density_per_country = "output/population_density"
-total_vaccinations_per_million = "output/vaccinations_pm"
-people_vaccinated_per_million = "output/people_vaccinated_pm"
+deaths_per_country = "s3://datalake-ricardo-pucminas-808833868807/output/deaths"
+death_per_million_per_country = "s3://datalake-ricardo-pucminas-808833868807/output/death_pm"
+excess_mortality_per_million_per_country = "s3://datalake-ricardo-pucminas-808833868807/output/excess_mortality_pm"
+population_density_per_country = "s3://datalake-ricardo-pucminas-808833868807/output/population_density"
+total_vaccinations_per_million = "s3://datalake-ricardo-pucminas-808833868807/output/vaccinations_pm"
+people_vaccinated_per_million = "s3://datalake-ricardo-pucminas-808833868807/output/people_vaccinated_pm"
 
 # Local de output da tabela final consolidada
 tabela_final_local = "output/indicadores_consolidados"
