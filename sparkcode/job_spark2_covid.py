@@ -40,7 +40,7 @@ total_vaccinations_per_million = "s3://datalake-ricardo-pucminas-808833868807/ou
 people_vaccinated_per_million = "s3://datalake-ricardo-pucminas-808833868807/output/people_vaccinated_pm"
 
 # Local de output da tabela final consolidada
-tabela_final_local = "output/indicadores_consolidados"
+tabela_final_local = "s3://datalake-ricardo-pucminas-808833868807/output/indicadores_consolidados"
 
 print("Reading parquet files from S3...")
 
