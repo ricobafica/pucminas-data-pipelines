@@ -87,12 +87,12 @@ def dag_1():
 
     
     @task
-    def emr_process_titanic(cid: str):
+    def emr_process_covid(cid: str):
         newstep = client.add_job_flow_steps(
             JobFlowId=cid,
             Steps=[
                 {
-                    'Name': 'Processa indicadores Titanic',
+                    'Name': 'Processa indicadores covid',
                     'ActionOnFailure': "CONTINUE",
                     'HadoopJarStep': {
                         'Jar': 'command-runner.jar',
@@ -136,7 +136,7 @@ def dag_1():
 
     esperacluster = wait_emr_cluster(cluster)
 
-    indicadores = emr_process_titanic(cluster) 
+    indicadores = emr_process_covid(cluster) 
     esperacluster >> indicadores
 
     wait_step = wait_emr_job(cluster, indicadores)
