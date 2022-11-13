@@ -1,7 +1,9 @@
 from airflow.decorators import task, dag
 from airflow.operators.dummy import DummyOperator
 from airflow.models import Variable
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime
+
 import boto3
 
 aws_access_key_id = Variable.get('aws_access_key_id')
@@ -140,7 +142,11 @@ def dag_1():
     wait_step = wait_emr_job(cluster, indicadores)
 
     terminacluster = terminate_emr_cluster(cluster)
-    wait_step >> terminacluster >> fim
+
+    triggerdag = TriggerDagRunOperator(
+        task_id="tarefa_inicial",
+        trigger_dag_id="dag_2")
+    wait_step >> terminacluster >> fim >> triggerdag
     #---------------
 
 execucao = dag_1()
