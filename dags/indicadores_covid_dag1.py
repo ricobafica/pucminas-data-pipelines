@@ -137,7 +137,7 @@ def dag_1():
 
     # Orquestração
     tarefainicial = tarefa_inicial()
-    cluster = emr_create_cluster()
+    cluster = "j-1V1XH7RCAC1ZV"
     inicio >> tarefainicial >> cluster
 
     esperacluster = wait_emr_cluster(cluster)
