@@ -1,6 +1,5 @@
 from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
-import pandas as pd 
 
 print(" \n\n Estou Aqui!!!!!!! \n\n")
 
