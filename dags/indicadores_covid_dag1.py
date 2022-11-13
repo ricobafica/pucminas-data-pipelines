@@ -137,7 +137,7 @@ def dag_1():
 
     # Orquestração
     tarefainicial = tarefa_inicial()
-    cluster = "j-1V1XH7RCAC1ZV"
+    cluster = "j-2JNLTUP0NXGG8"
     # inicio >> tarefainicial >> cluster
     inicio >> tarefainicial
 
@@ -148,8 +148,7 @@ def dag_1():
 
     wait_step = wait_emr_job(cluster, indicadores)
 
-    terminacluster = terminate_emr_cluster(cluster)
-
+    # terminacluster = terminate_emr_cluster(cluster)
     # wait_step >> terminacluster >> fim >> triggerdag
     wait_step >> fim >> triggerdag
     #---------------
