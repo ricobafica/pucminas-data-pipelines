@@ -14,11 +14,16 @@ client = boto3.client(
 )
 
 default_args = {
-    'owner': 'Ney',
+    'owner': 'Ricardo_Sylvio',
     'start_date': datetime(2022, 4, 2)
 }
 
-@dag(default_args=default_args, schedule_interval="@once", description="Executa um job Spark no EMR", catchup=False, tags=['Spark','EMR'])
+@dag(
+    default_args=default_args, 
+    schedule_interval="@once", 
+    description="Executa o job Spark 2 no EMR do trabalho final", 
+    catchup=False, 
+    tags=['DAG2', 'Spark','EMR'])
 def dag_2():
 
     inicio = DummyOperator(task_id='inicio')
@@ -30,11 +35,11 @@ def dag_2():
     @task
     def emr_create_cluster():
         cluster_id = client.run_job_flow( # Cria um cluster EMR
-            Name='Automated_EMR_Ney',
+            Name='Automated_EMR_Ricardo_Sylvio',
             ServiceRole='EMR_DefaultRole',
             JobFlowRole='EMR_EC2_DefaultRole',
             VisibleToAllUsers=True,
-            LogUri='s3://aws-logs-539445819060-us-east-1/elasticmapreduce/',
+            LogUri='s3://airflow-logs-808833868807/logs/',
             ReleaseLabel='emr-6.8.0',
             Instances={
                 'InstanceGroups': [
@@ -56,7 +61,7 @@ def dag_2():
                 'Ec2KeyName': 'ney-pucminas-testes',
                 'KeepJobFlowAliveWhenNoSteps': True,
                 'TerminationProtected': False,
-                'Ec2SubnetId': 'subnet-09b06b5d8fc0d0062'
+                'Ec2SubnetId': 'subnet-0062c7d95224541ce'
             },
 
             Applications=[{'Name': 'Spark'}, {'Name': 'Hive'}],
