@@ -144,8 +144,9 @@ def dag_1():
     terminacluster = terminate_emr_cluster(cluster)
 
     triggerdag = TriggerDagRunOperator(
-        task_id="tarefa_inicial",
+        task_id="Trigger_dag2",
         trigger_dag_id="dag_2")
+        
     wait_step >> terminacluster >> fim >> triggerdag
     #---------------
 
