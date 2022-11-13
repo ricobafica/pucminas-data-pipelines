@@ -129,6 +129,11 @@ def dag_1():
 
     fim = DummyOperator(task_id="fim")
 
+    triggerdag = TriggerDagRunOperator(
+    task_id="Trigger_dag2",
+    trigger_dag_id="dag_2")
+
+
     # Orquestração
     tarefainicial = tarefa_inicial()
     cluster = emr_create_cluster()
@@ -142,10 +147,6 @@ def dag_1():
     wait_step = wait_emr_job(cluster, indicadores)
 
     terminacluster = terminate_emr_cluster(cluster)
-
-    triggerdag = TriggerDagRunOperator(
-        task_id="Trigger_dag2",
-        trigger_dag_id="dag_2")
 
     wait_step >> terminacluster >> fim >> triggerdag
     #---------------
