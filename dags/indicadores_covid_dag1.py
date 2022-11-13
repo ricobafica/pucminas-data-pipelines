@@ -60,7 +60,7 @@ def dag_1():
                         'InstanceCount': 1,
                     }
                 ],
-                'Ec2KeyName': 'kubepucminasricardo',
+                'Ec2KeyName': 'eksctl-kubepucminasricardo-cluster',
                 'KeepJobFlowAliveWhenNoSteps': True,
                 'TerminationProtected': False,
                 'Ec2SubnetId': 'subnet-0062c7d95224541ce'
