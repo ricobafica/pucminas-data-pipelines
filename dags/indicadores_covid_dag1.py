@@ -120,6 +120,7 @@ def dag_1():
                 'MaxAttempts': 600
             }
         )
+        return True
     
     @task
     def terminate_emr_cluster(cid: str):
