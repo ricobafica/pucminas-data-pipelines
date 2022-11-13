@@ -36,40 +36,39 @@ def dag_1():
 
     @task
     def emr_create_cluster():
-        # cluster_id = client.run_job_flow( # Cria um cluster EMR
-        #     Name='Automated_EMR_Ricardo_Sylvio',
-        #     ServiceRole='EMR_DefaultRole',
-        #     JobFlowRole='EMR_EC2_DefaultRole',
-        #     VisibleToAllUsers=True,
-        #     LogUri='s3://airflow-logs-808833868807/logs/',
-        #     ReleaseLabel='emr-6.8.0',
-        #     Instances={
-        #         'InstanceGroups': [
-        #             {
-        #                 'Name': 'Master nodes',
-        #                 'Market': 'ON_DEMAND',
-        #                 'InstanceRole': 'MASTER',
-        #                 'InstanceType': 'm5.xlarge',
-        #                 'InstanceCount': 1,
-        #             },
-        #             {
-        #                 'Name': 'Worker nodes',
-        #                 'Market': 'ON_DEMAND',
-        #                 'InstanceRole': 'CORE',
-        #                 'InstanceType': 'm5.xlarge',
-        #                 'InstanceCount': 1,
-        #             }
-        #         ],
-        #         'Ec2KeyName': 'keypairs-pucminas-testes',
-        #         'KeepJobFlowAliveWhenNoSteps': True,
-        #         'TerminationProtected': False,
-        #         'Ec2SubnetId': 'subnet-064a685e1c7e8c8e7'
-        #     },
+        cluster_id = client.run_job_flow( # Cria um cluster EMR
+            Name='Automated_EMR_Ricardo_Sylvio',
+            ServiceRole='EMR_DefaultRole',
+            JobFlowRole='EMR_EC2_DefaultRole',
+            VisibleToAllUsers=True,
+            LogUri='s3://airflow-logs-808833868807/logs/',
+            ReleaseLabel='emr-6.8.0',
+            Instances={
+                'InstanceGroups': [
+                    {
+                        'Name': 'Master nodes',
+                        'Market': 'ON_DEMAND',
+                        'InstanceRole': 'MASTER',
+                        'InstanceType': 'm5.xlarge',
+                        'InstanceCount': 1,
+                    },
+                    {
+                        'Name': 'Worker nodes',
+                        'Market': 'ON_DEMAND',
+                        'InstanceRole': 'CORE',
+                        'InstanceType': 'm5.xlarge',
+                        'InstanceCount': 1,
+                    }
+                ],
+                'Ec2KeyName': 'keypairs-pucminas-testes',
+                'KeepJobFlowAliveWhenNoSteps': True,
+                'TerminationProtected': False,
+                'Ec2SubnetId': 'subnet-064a685e1c7e8c8e7'
+            },
 
-        #     Applications=[{'Name': 'Spark'}, {'Name': 'Hive'}],
-        # )
-        # return cluster_id["JobFlowId"]
-        return "j-1V1XH7RCAC1ZV"
+            Applications=[{'Name': 'Spark'}, {'Name': 'Hive'}],
+        )
+        return cluster_id["JobFlowId"]
 
 
     @task
@@ -139,7 +138,8 @@ def dag_1():
     # Orquestração
     tarefainicial = tarefa_inicial()
     cluster = "j-1V1XH7RCAC1ZV"
-    inicio >> tarefainicial >> cluster
+    # inicio >> tarefainicial >> cluster
+    inicio >> tarefainicial
 
     esperacluster = wait_emr_cluster(cluster)
 
@@ -150,7 +150,8 @@ def dag_1():
 
     terminacluster = terminate_emr_cluster(cluster)
 
-    wait_step >> terminacluster >> fim >> triggerdag
+    # wait_step >> terminacluster >> fim >> triggerdag
+    wait_step >> fim >> triggerdag
     #---------------
 
 execucao = dag_1()
