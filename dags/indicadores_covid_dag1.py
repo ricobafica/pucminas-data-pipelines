@@ -60,7 +60,7 @@ def dag_1():
                         'InstanceCount': 1,
                     }
                 ],
-                'Ec2KeyName': 'ney-pucminas-testes',
+                'Ec2KeyName': 'kubepucminasricardo',
                 'KeepJobFlowAliveWhenNoSteps': True,
                 'TerminationProtected': False,
                 'Ec2SubnetId': 'subnet-0062c7d95224541ce'
@@ -146,7 +146,7 @@ def dag_1():
     triggerdag = TriggerDagRunOperator(
         task_id="Trigger_dag2",
         trigger_dag_id="dag_2")
-        
+
     wait_step >> terminacluster >> fim >> triggerdag
     #---------------
 
