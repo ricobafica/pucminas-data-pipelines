@@ -14,12 +14,17 @@ client = boto3.client(
 )
 
 default_args = {
-    'owner': 'Ney',
+    'owner': 'Ricardo',
     'start_date': datetime(2022, 4, 2)
 }
 
-@dag(default_args=default_args, schedule_interval="@once", description="Executa um job Spark no EMR", catchup=False, tags=['Spark','EMR'])
-def indicadores_titanic():
+@dag(
+    default_args=default_args, 
+    schedule_interval="@once", 
+    description="Executa o job Spark 1 no EMR do trabalho final", 
+    catchup=False, 
+    tags=['DAG1', 'Spark','EMR'])
+def dag_1():
 
     inicio = DummyOperator(task_id='inicio')
 
@@ -138,4 +143,4 @@ def indicadores_titanic():
     wait_step >> terminacluster >> fim
     #---------------
 
-execucao = indicadores_titanic()
+execucao = dag_1()

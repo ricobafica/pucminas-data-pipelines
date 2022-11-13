@@ -19,7 +19,7 @@ default_args = {
 }
 
 @dag(default_args=default_args, schedule_interval="@once", description="Executa um job Spark no EMR", catchup=False, tags=['Spark','EMR'])
-def indicadores_titanic():
+def dag_2():
 
     inicio = DummyOperator(task_id='inicio')
 
@@ -93,7 +93,7 @@ def indicadores_titanic():
                                 '--master', 'yarn',
                                 '--deploy-mode', 'cluster',
                                 '--packages', 'io.delta:delta-core_2.12:2.1.0',
-                                's3://emr-code-539445819060/ney/pyspark/titanic_example_delta.py'
+                                's3://datalake-ricardo-pucminas-808833868807/jobs_spark/job_spark2_covid.py'
                                 ]
                     }
                 }
@@ -138,4 +138,4 @@ def indicadores_titanic():
     wait_step >> terminacluster >> fim
     #---------------
 
-execucao = indicadores_titanic()
+execucao = dag_2()
