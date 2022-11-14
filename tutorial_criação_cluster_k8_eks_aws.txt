@@ -1,0 +1,274 @@
+PARA CRIAR O CLUSTER NO Kubernetes:
+
+	Aula 05 a partir de 1h10
+
+		Ney explica o comando que cria o cluster em 1:12:05
+		Ney alerta para possivel erro na criação do cluster em 1:13:27
+		Ney ensina como consertar em 1:17:27
+
+	1. Verificar que todos os pre requisitos estão instalados
+	
+		digitar no terminal do Visual Studio Code
+		> kubectl version --short # ou minikube version
+		> helm version (so vi no powershell)
+		> eksctl version (so vi no powershell)
+		> aws --version
+		> aws configure corretamente configurado tal como informado em :
+			https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config
+
+	2. digitar no terminal bash:
+ 	   > eksctl create cluster --version=1.21 --name=kubepucminasricardo --managed --instance-types=m5.xlarge --alb-ingress-access --node-private-networking --region=us-east-1 --nodes-min=2 --nodes-max=3 --full-ecr-access --asg-access --nodegroup-name=ng-kubepucminasricardo 
+
+	   Explicando as linhas:  vai de 1:15:00 até 1:26:36
+
+		eksctl create cluster \					# cria um cluster na Amazon Elastic Kubernetes Service
+		--version=1.21							# versao do k8 a criar
+		--name=kubepucminasricardo \	 		# para o nome do cluster
+		--managed \ 							# managed significa automatizado
+		--instance-types=m5.xlarge \			# tipo de instancia escolhida, foi a minima para se funcionar
+		--alb-ingress-access \ 					# acesso a load balance para disponibilizar o que tiver no cluster para o mundo
+		--node-private-networking \ 			# networking entre nos sera privado
+		--region=us-east-1 \					# a região sera us-east-1 de virginia
+		--nodes-min=2 --nodes-max=3 \			# definimos autoscaling de min=2 e max=3
+		--full-ecr-access \						# da acesso full a ecr, que headstreet de imagens da aws, que é privado
+		--asg-access \							# preciso habilitar para permitir o auto-scaling 
+		--nodegroup-name=ng-kubepucminasricardo	# como vai ser o nome do grupo de maquininhas ec2 agrupadas no cluster
+
+	3. A criação demora mais de 17 min
+
+		O eksctl cria 2 pilhas: uma para node, outra para cluster.
+		Ambas devem migrar para o status "create complete"
+
+	3. Confirmar que o cluster com 2 maquinas foi criado e está funcionando perfeitamente.
+
+		visitar EC2 na AWS, clicar em instances, confirmar que há duas maquinas em execução.
+		visitar Cloud Formation, clicar em pilhas, confirmar que há duas pilhas criadas.
+
+	4. Acessar o contexto e visualizar que cluster está ativo:
+		> kubectl config get-contexts
+		
+		CURRENT   NAME                                                CLUSTER                                   AUTHINFO                                    NAMESPACE
+		*         aluno-puc@kubepucminasricardo.us-east-1.eksctl.io   kubepucminasricardo.us-east-1.eksctl.io   aluno-puc@kubepucminasricardo.us-east-1.eksctl.io
+
+	5. Visualizar os nos do meu cluster
+		> kubectl get nodes
+
+		NAME                              STATUS   ROLES    AGE     VERSION
+		ip-192-168-118-187.ec2.internal   Ready    <none>   6m26s   v1.21.14-eks-ba74326
+		ip-192-168-71-211.ec2.internal    Ready    <none>   6m27s   v1.21.14-eks-ba74326
+
+	6. K8 utiliza 4 namespaces default (default, kube-node-lease, kube-public, kube-system)
+		> kubectl get namespaces
+
+		NAME              STATUS   AGE
+		default           Active   21m
+		kube-node-lease   Active   21m
+		kube-public       Active   21m
+		kube-system       Active   21m
+
+	7. para ver onde os containers rodam (os pods) no kubernetes 
+		> kubectl get pods -n kube-system
+
+		NAME                       READY   STATUS    RESTARTS   AGE
+		aws-node-8j9sv             1/1     Running   0          7m22s
+		aws-node-nzl9p             1/1     Running   0          7m23s
+		coredns-66cb55d4f4-2bglv   1/1     Running   0          14m
+		coredns-66cb55d4f4-4468z   1/1     Running   0          14m
+		kube-proxy-mrp4c           1/1     Running   0          7m23s
+		kube-proxy-xrqwn           1/1     Running   0          7m22s
+
+
+PARA O DEPLOY DO AIRFLOW NO k8s (1h55)
+
+	1. criar namespace AIRFLOW na nuvem !
+		> kubectl create namespace airflow
+	
+	2. consultar o namespace na nuvem !
+		> kubectl get namespaces
+		ou
+		> kubectl get ns
+
+	3. Criar um folder na maquina local chamado "airflow_aws" dentro da pasta desafio Final
+	
+	4. Instalar o helm chart na maquina (desnecessario)
+
+			O helm chart é o deployment inteiro do airflow com tudo que o ultimo precisa parametrizado.
+			Os parametros estarao armazenados no arquivo custom_values que sera criado abaixo.
+			O guia do helm chart for apache airflow está disponível em:
+			https://airflow.apache.org/docs/helm-chart/stable/index.html
+
+	5. Rodar o codigo abaixo no terminal localizado na pasta airflow_aws recem criada
+		> helm repo add apache-airflow https://airflow.apache.org
+			o proprio helm vai informar que precisa instalar uma versao nova e vai iniciar a alterações
+			- "apache-airflow" already exists with the same configuration, skipping
+		
+
+			(Sugestão Ney abandonada para uso da solução de Giovanni)
+
+				a. Rodar script abaixo que mostra o arquivo 'custom_values.yaml' e o grava na pasta local "airflow_aws/"
+					O comando ">>" junta 2 comandos na mesma linha
+					O arquivo 'custom_values.yaml' é o deployement inteiro do airflow parametrizado com tudo que ele precisa para funcionar na nuvem.
+					> helm show values apache-airflow/airflow >> airflow_aws/custom_values.yaml
+				
+				b. (não fiz) Gravar o arquivo 'custom_values.yaml' na pasta da nuvem "airflow_aws/custom_values.yaml"
+					> helm show values apache-airflow/airflow >> airflow_aws/custom_values.yaml
+
+	6. 	Duração: 15 min - Sugestão do Giovanni
+
+		Iniciar o deployment do airflow no EKS da AWS com toda sua estrutura de codigos:
+		Abrir o terminal na pasta desafio_final, e rodar o script:
+		> helm upgrade --install airflow apache-airflow/airflow --namespace airflow --create-namespace -f airflow_aws/override-values.yaml --debug --timeout 60m0s
+
+			airflow									# qual é o nome para a solução
+			apache-airflow/airflow					# qual é o helm chart que estamos deployando
+			-f airflow_aws/override-values.yaml		# qual é o arquivo de values que usamos para deployar
+			-n airflow								# qual é o namespace que vamos deployar
+			--debug 								# para observar o deployment a medida que ele ocorre
+
+		Comentários do Giovanni:
+		O meu arquivo de configuração estava dentro de uma pasta chamada "airflow" por isso tem o /
+		> helm upgrade --install airflow apache-airflow/airflow --namespace <nome do seu namespace> --create-namespace -f airflow/override-values.yaml --debug --timeout 10m0s
+
+		Se der timeout:
+		> helm delete airflow -n airflow
+		> helm repo add apache-airflow https://airflow.apache.org
+		> helm repo update
+		> helm upgrade --install airflow apache-airflow/airflow --namespace airflow --create-namespace -f airflow_aws/override-values.yaml --debug --timeout 60m0s
+
+
+	7. o comando abaixo informa os pods que estão rodando no momento:
+		> kubectl get pods -n airflow
+
+			NAME                                 READY   STATUS    RESTARTS   AGE
+			airflow-postgresql-0                 1/1     Running   0          105s
+			airflow-scheduler-9c9fd99c4-n7bqb    3/3     Running   0          105s
+			airflow-statsd-7bc5f8f5ff-zzcjh      1/1     Running   0          105s
+			airflow-triggerer-57cdc66d46-kv76h   2/2     Running   0          105s
+			airflow-webserver-84c788fd87-9q8g6   1/1     Running   0          105s
+
+			1 pod de postgre
+			3 pods de scheduler
+			1 pod de statsd			# especie de exporter de logs do airflow
+			2 triggerer
+			1 webserver				# interface do usuario
+			0 worker				# não tem worker porque KubernetesExecutor so o cria em tempo de execução
+
+	9. o comando abaixo indica os serviços que k8 criou
+	> kubectl get svc -n airflow
+
+		NAME                          TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)             AGE
+		airflow-postgresql            ClusterIP      10.100.82.104    <none>                                                                    5432/TCP            2m19s
+		airflow-postgresql-headless   ClusterIP      None             <none>                                                                    5432/TCP            2m19s
+		airflow-statsd                ClusterIP      10.100.106.245   <none>                                                                    9125/UDP,9102/TCP   2m19s
+		airflow-webserver             LoadBalancer   10.100.137.229   a4e00444629214eb4a0902bf44198a51-1519454172.us-east-1.elb.amazonaws.com   8080:30669/TCP      2m19s
+
+		3 clusterIP para o postgres
+		1 LoadBalancer para o webserver, que tem um DNS público
+
+	10. Entrar no cluster e resetar a senha	
+	
+		Eu devo entao entrar no DNS adicionando :8080 para acessar os clusters, opcões:
+		8080:a2f90e86cdfbe4fada004aec1099ef68-398975813.us-east-1.elb.amazonaws.com
+		a2f90e86cdfbe4fada004aec1099ef68-398975813.us-east-1.elb.amazonaws.com:8080
+
+	11. Visualizar o PVC volume persistence
+		kubectl get pvc -n airflow
+
+		NAME                        STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+		data-airflow-postgresql-0   Bound    pvc-2c635528-81c9-4b41-9cb6-e0582ae2deb2   8Gi        RWO            gp2            3m49s
+
+
+		O pvc, chamado de volume persistente, permite ao k8 possuir controle de status para pods/containers.
+		Quando um pod/container cai, o k8 é capaz de subir um outro identico no lugar do que caiu.
+		Falhas são comuns e este recurso é muito importante para o sucesso do k8.
+		Com o pvc, o k8 pode recuperar um container com postgres que tenha caido, sem perdas.
+
+
+	12. cadastrar a conexão 'my-aws' da linha 245
+		ir em airflow > admin > conexions > +
+			connection id = my_aws
+			connection type = aws
+			login = é a aws_access_key_id = 
+			password = é a secret access key da aws
+
+	13. add variable conexão 'my-aws' das linhas 8 e 9
+
+		ir em airflow > admin > variables > +
+			key = digitar: aws_access_key_id
+			val = colocar o valor da aws_access_key_id
+			description = access key para aws
+
+		ir em airflow > admin > variables > +
+			key = digitar== aws_secret_access_key
+			val = colocar o valor da aws_secret_access_key
+			description = secret_access_key para aws
+
+		esta ação permitiu ao airflow encontrar as dags informadas no github
+
+
+	14. mudar o nome da subnet nas DAG´s do covid da variavel Ec2SubnetId dento do "create cluster EMR"
+		 consultar o subnet correto em EC2 > Instancias > ID da sub-rede
+		 em 13.11 n nome era : subnet-0062c7d95224541ce
+
+	15. a dag indicadores_titanic faz o seguinte:
+
+			usa a biblioteca boto3, sdk oficial da aws para python
+			cria cluster spark emr
+			manda jobs para serem executados no cluster
+			termina os clusters no emr
+			
+
+
+A tarefa Final é executar os seguintes passos:
+
+	1. usar o emr da aws
+	2. airflow vai criar/subir um cluster na aws
+	3. assim que este cluster estiver ativo, o airflow executa o job no cluster
+	4. e logo apos execução, o airflow vai matar o cluster
+
+
+	Ney cria um cluster no EMS manualmente com:
+	- Hadoop, Hive, Spark
+	- 1 master + 1 core Instancias
+	- 10Gb
+	- cluster name= airflow_emr_cluster
+	- logging= s3://aws-logs-5394458-us-east-1/elastic
+	- termination protection = desabilitado
+
+	networking:
+	- escolheu EC2 subnet gual ao do eksctl-kubeea3dataney.....
+	- Se utiliza de uma API add_job_flow_steps
+	
+	arquivo titanic_exemple_delta explicado em 2h51
+	- arquivo foi feito para delta, entao a linha 43 é específica para isto
+
+
+
+
+
+	security options (2h38)
+	- ec2 key pair= usou um existente caso precisasse entrar numa eventualidade
+
+
+
+
+
+
+parei em 2h35, mas já escrevi como desligar tudo :
+
+Desinstalar/encerrar os clusters k8 e EMR da AWS:
+
+	no AWS EMR >> cluster >> terminate
+	no terminal digitar:
+		> cd pucminas-data-pipelines
+		> ls
+		> kubectl get pods -n airflow			# confirma que está ativo
+		> helm delete airflow -n airflow     	# -n airflow é o namespace onde o cluster esta
+		> kubectl delete pvc --all -n airflow	# para desinstalar o pvc no namespace airflow
+		> kubectl delete svc --all -n airflow	# para desinstalar o pvc no namespace airflow
+		e confirmo que foram de fato terminados:
+			> kubectl get pvc -n airflow
+			> kubectl get svc -n airflow
+		e agora deleto as stacks criadas no cloudFormation da aws
+			> eksctl delete cluster --region=us-east-1 --name=kubepucminasricardo
+		visitar cloud formation e observar que ele deletou as pilhas.
