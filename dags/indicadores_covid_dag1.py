@@ -87,7 +87,7 @@ def dag_1():
 
     
     @task
-    def emr_process_covid(cid: str):
+    def emr_process_covid1(cid: str):
         newstep = client.add_job_flow_steps(
             JobFlowId=cid,
             Steps=[
@@ -109,7 +109,43 @@ def dag_1():
         return newstep['StepIds'][0]
 
     @task
-    def wait_emr_job(cid: str, stepId: str):
+    def wait_emr_job1(cid: str, stepId: str):
+        waiter = client.get_waiter('step_complete')
+
+        waiter.wait(
+            ClusterId=cid,
+            StepId=stepId,
+            WaiterConfig={
+                'Delay': 10,
+                'MaxAttempts': 600
+            }
+        )
+        return True
+
+    @task
+    def emr_process_covid2(cid: str):
+        newstep = client.add_job_flow_steps(
+            JobFlowId=cid,
+            Steps=[
+                {
+                    'Name': 'Processa Consolidação dos indicadores covid',
+                    'ActionOnFailure': "CONTINUE",
+                    'HadoopJarStep': {
+                        'Jar': 'command-runner.jar',
+                        'Args': ['spark-submit',
+                                '--master', 'yarn',
+                                '--deploy-mode', 'cluster',
+                                '--packages', 'io.delta:delta-core_2.12:2.1.0',
+                                's3://datalake-ricardo-pucminas-808833868807/jobs_spark/job_spark2_covid.py'
+                                ]
+                    }
+                }
+            ]
+        )
+        return newstep['StepIds'][0]
+
+    @task
+    def wait_emr_job2(cid: str, stepId: str):
         waiter = client.get_waiter('step_complete')
 
         waiter.wait(
@@ -130,27 +166,26 @@ def dag_1():
 
     fim = DummyOperator(task_id="fim")
 
-    triggerdag = TriggerDagRunOperator(
-    task_id="Trigger_dag2",
-    trigger_dag_id="dag_2")
-
 
     # Orquestração
     tarefainicial = tarefa_inicial()
-    cluster = "j-2JNLTUP0NXGG8"
-    # inicio >> tarefainicial >> cluster
-    inicio >> tarefainicial
+    cluster = emr_create_cluster()
+    inicio >> tarefainicial >> cluster
+    # inicio >> tarefainicial
 
     esperacluster = wait_emr_cluster(cluster)
-
-    indicadores = emr_process_covid(cluster) 
+    indicadores = emr_process_covid1(cluster) 
     esperacluster >> indicadores
 
-    wait_step = wait_emr_job(cluster, indicadores)
+    wait_step1 = wait_emr_job1(cluster, indicadores)
+    indicadores_consolidado = emr_process_covid2(cluster)
+    wait_step1 >> indicadores_consolidado
+
+    wait_step2 = wait_emr_job2(cluster, indicadores_consolidado)
+    wait_step2 >> fim
 
     # terminacluster = terminate_emr_cluster(cluster)
-    # wait_step >> terminacluster >> fim >> triggerdag
-    wait_step >> fim >> triggerdag
+    # wait_step >> terminacluster >> fim
     #---------------
 
 execucao = dag_1()
