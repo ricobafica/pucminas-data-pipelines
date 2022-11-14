@@ -63,7 +63,7 @@ def dag_1():
                 'Ec2KeyName': 'keypairs-pucminas-testes',
                 'KeepJobFlowAliveWhenNoSteps': True,
                 'TerminationProtected': False,
-                'Ec2SubnetId': 'subnet-064a685e1c7e8c8e7'
+                'Ec2SubnetId': 'subnet-05aaae4f0b25e38a2'
             },
 
             Applications=[{'Name': 'Spark'}, {'Name': 'Hive'}],
