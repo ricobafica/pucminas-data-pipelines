@@ -1,8 +1,6 @@
 from pyspark.sql import functions as f
 from pyspark.sql import SparkSession
 
-print(" \n\n Estou Aqui!!!!!!! \n\n")
-
 def write_parquet(view, local):
     view.show()
     (
