@@ -66,7 +66,7 @@ def dag_1():
                 'Ec2SubnetId': 'subnet-05aaae4f0b25e38a2'
             },
 
-            Applications=[{'Name': 'Spark'}, {'Name': 'Hive'}],
+            Applications=[{'Name': 'Spark'}, {'Name': 'Hive'}, {'Name':'JupyterEnterpriseGateway'} ],
         )
         return cluster_id["JobFlowId"]
 
