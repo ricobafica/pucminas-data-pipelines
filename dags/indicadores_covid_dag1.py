@@ -185,7 +185,7 @@ def dag_1():
     wait_step2 >> fim
 
     # terminacluster = terminate_emr_cluster(cluster)
-    # wait_step >> terminacluster >> fim >> triggerdag
+    # wait_step >> terminacluster >> fim
     #---------------
 
 execucao = dag_1()
